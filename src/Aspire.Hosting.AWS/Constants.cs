@@ -25,8 +25,6 @@ internal static class Constants
     public const string DefaultConfigSection = "AWS:Resources";
 
     internal const string IsAspireHostedEnvVariable = "ASPIRE_HOSTED";
-
-    internal const string LambdaPreviewMessage = "Local Lambda development feature is still in active development. Check out the following GitHub issue for status: https://github.com/aws/integrations-on-dotnet-aspire-for-aws/issues/17";
     
     /// <summary>
     /// The launch settings profile name prefix
@@ -52,4 +50,9 @@ internal static class Constants
     /// The default directory the Lambda Test Tool will be configured for storing configuration information like saved requests.
     /// </summary>
     internal const string DefaultLambdaConfigStorage = ".aws-lambda-testtool";
+
+    /// <summary>
+    /// Diagnostic ID for Aspire publishing with AWS indicating the feature is experimental.
+    /// </summary>
+    internal const string ASPIREAWSPUBLISHERS001 = "ASPIREAWSPUBLISHERS001";
 }
