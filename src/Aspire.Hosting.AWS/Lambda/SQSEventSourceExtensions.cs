@@ -153,8 +153,23 @@ public static class SQSEventSourceExtensions
         if (!string.IsNullOrEmpty(queueName))
         {
             var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(queueName)))[..8].ToLowerInvariant();
-            var shortName = $"SQSEventSource-{lambdaName}-{hash}";
-            return shortName.Length <= MaxResourceNameLength ? shortName : shortName[..MaxResourceNameLength];
+
+            // Always keep the hash at the end; truncate only the prefix if needed.
+            if (MaxResourceNameLength <= hash.Length)
+            {
+                // Degenerate case: not enough room for the full hash; use as much as fits.
+                return hash[..MaxResourceNameLength];
+            }
+
+            var prefix = $"SQSEventSource-{lambdaName}-";
+            var maxPrefixLength = MaxResourceNameLength - hash.Length;
+
+            if (prefix.Length > maxPrefixLength)
+            {
+                prefix = prefix[..maxPrefixLength];
+            }
+
+            return prefix + hash;
         }
 
         return resourceName[..MaxResourceNameLength];
