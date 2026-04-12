@@ -1,4 +1,4 @@
-﻿// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 using System.Text.Json.Serialization;
 
@@ -11,12 +11,13 @@ namespace Aspire.Hosting.AWS.Lambda;
 /// </summary>
 internal class RouteConfig
 {
-    internal RouteConfig(string lambdaResourceName, string endpoint, Method httpMethod, string path)
+    internal RouteConfig(string lambdaResourceName, string endpoint, Method httpMethod, string path, string? integrationType = null)
     {
         LambdaResourceName = lambdaResourceName;
         Endpoint = endpoint;
         HttpMethod = httpMethod;
         Path = path;
+        IntegrationType = integrationType;
     }
 
     public string LambdaResourceName { get; init; }
@@ -27,4 +28,10 @@ internal class RouteConfig
     public Method HttpMethod { get; init; }
 
     public string Path { get; init; }
+
+    /// <summary>
+    /// The integration type: "Lambda" (default) or "Http". When "Http", the request is proxied to the Endpoint URL instead of invoking a Lambda.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? IntegrationType { get; init; }
 }

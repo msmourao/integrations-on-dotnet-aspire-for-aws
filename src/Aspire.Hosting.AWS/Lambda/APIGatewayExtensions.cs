@@ -1,4 +1,4 @@
-﻿// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.AWS;
@@ -103,6 +103,32 @@ public static class APIGatewayExtensions
             var configJson = JsonSerializer.Serialize(config);
             context.EnvironmentVariables[envName] = configJson;
         });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Add a reference for a hosted project to be proxied by the API Gateway emulator via HTTP integration.
+    /// The project's HTTP endpoint is used as the backend; the emulator proxies requests to it.
+    /// </summary>
+    /// <param name="builder">The API Gateway emulator resource builder.</param>
+    /// <param name="project">The project resource (must have an "http" endpoint).</param>
+    /// <param name="httpMethod">The HTTP method the route should match.</param>
+    /// <param name="path">The resource path (e.g. "/api/users" or "/api/{proxy+}").</param>
+    /// <returns>The API Gateway emulator resource builder.</returns>
+    public static IResourceBuilder<APIGatewayEmulatorResource> WithReference(this IResourceBuilder<APIGatewayEmulatorResource> builder, IResourceBuilder<ProjectResource> project, Method httpMethod, string path)
+    {
+        if (builder is IResourceBuilder<IResourceWithWaitSupport> waitSupport)
+        {
+            waitSupport.WaitFor(project);
+        }
+
+        var endpointRef = project.GetEndpoint("http");
+        var resourceName = project.Resource.Name;
+        var methodStr = httpMethod.ToString();
+        var configExpr = ReferenceExpression.Create($"{{\"LambdaResourceName\":\"{resourceName}\",\"Endpoint\":\"{endpointRef}\",\"HttpMethod\":\"{methodStr}\",\"Path\":\"{path}\",\"IntegrationType\":\"Http\"}}");
+        var envName = "APIGATEWAY_EMULATOR_ROUTE_CONFIG_" + resourceName;
+        builder.WithEnvironment(envName, configExpr);
 
         return builder;
     }
